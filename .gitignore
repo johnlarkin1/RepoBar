@@ -82,3 +82,9 @@ DerivedData/
 *.swp
 *.swo
 *.idea/
+
+# packages
+Packages
+
+# claude
+.claude/settings.local.json
