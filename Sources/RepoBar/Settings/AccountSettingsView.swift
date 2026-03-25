@@ -5,7 +5,7 @@ import SwiftUI
 struct AccountSettingsView: View {
     @Bindable var session: Session
     let appState: AppState
-    @State private var clientID = "Iv23liGm2arUyotWSjwJ"
+    @State private var clientID = "Ov23liROVGCS5nqEhlqy"
     @State private var clientSecret = ""
     @State private var enterpriseHost = ""
     @State private var hostMode: HostMode = .githubCom
