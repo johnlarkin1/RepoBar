@@ -89,3 +89,8 @@ Packages
 # claude
 .claude/settings.local.json
 .env
+
+# release artifacts
+RepoBar.app
+RepoBar-*.zip
+RepoBar-*.dSYM.zip

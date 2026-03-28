@@ -105,7 +105,7 @@ stop: ## Kill running RepoBar
 
 clean: ## Clean build artifacts
 	swift package clean
-	rm -rf .build/debug/RepoBar.app
+	rm -rf .build/debug/RepoBar.app RepoBar.app
 
 coverage: ## Run tests with coverage
 	./Scripts/coverage.sh

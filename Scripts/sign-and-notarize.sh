@@ -2,98 +2,136 @@
 set -euo pipefail
 
 APP_NAME="RepoBar"
-APP_IDENTITY="Developer ID Application: Peter Steinberger (Y5PE65HELJ)"
+APP_IDENTITY="${APP_IDENTITY:-Developer ID Application: John Larkin (P3Q6VLD666)}"
+APP_BUNDLE="RepoBar.app"
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-cd "$ROOT"
 source "$ROOT/version.env"
-ZIP_NAME="RepoBar-${MARKETING_VERSION}.zip"
-DSYM_ZIP="RepoBar-${MARKETING_VERSION}.dSYM.zip"
+ZIP_NAME="${APP_NAME}-${MARKETING_VERSION}.zip"
+DSYM_ZIP="${APP_NAME}-${MARKETING_VERSION}.dSYM.zip"
 
-if [[ -z "${APP_STORE_CONNECT_API_KEY_P8:-}" || -z "${APP_STORE_CONNECT_KEY_ID:-}" || -z "${APP_STORE_CONNECT_ISSUER_ID:-}" ]]; then
-  echo "Missing APP_STORE_CONNECT_* env vars (API key, key id, issuer id)." >&2
+# Notarization credentials: support both APPLE_* and APP_STORE_CONNECT_* env vars.
+NOTARY_KEY_PATH=""
+NOTARY_KEY_ID=""
+NOTARY_ISSUER=""
+CLEANUP_KEY_FILE=false
+
+if [[ -n "${APPLE_API_KEY_PATH:-}" && -n "${APPLE_API_KEY:-}" && -n "${APPLE_ISSUER_ID:-}" ]]; then
+  NOTARY_KEY_PATH="$APPLE_API_KEY_PATH"
+  NOTARY_KEY_ID="$APPLE_API_KEY"
+  NOTARY_ISSUER="$APPLE_ISSUER_ID"
+elif [[ -n "${APP_STORE_CONNECT_API_KEY_P8:-}" && -n "${APP_STORE_CONNECT_KEY_ID:-}" && -n "${APP_STORE_CONNECT_ISSUER_ID:-}" ]]; then
+  echo "$APP_STORE_CONNECT_API_KEY_P8" | sed 's/\\n/\n/g' > /tmp/repobar-api-key.p8
+  NOTARY_KEY_PATH="/tmp/repobar-api-key.p8"
+  NOTARY_KEY_ID="$APP_STORE_CONNECT_KEY_ID"
+  NOTARY_ISSUER="$APP_STORE_CONNECT_ISSUER_ID"
+  CLEANUP_KEY_FILE=true
+else
+  echo "Missing notarization credentials. Set either APPLE_API_KEY_PATH/APPLE_API_KEY/APPLE_ISSUER_ID or APP_STORE_CONNECT_* env vars." >&2
   exit 1
 fi
+
+# Sparkle key is optional for fork builds (no auto-update feed).
+SKIP_SPARKLE=false
 if [[ -z "${SPARKLE_PRIVATE_KEY_FILE:-}" ]]; then
-  echo "SPARKLE_PRIVATE_KEY_FILE is required for release signing/verification." >&2
-  exit 1
-fi
-if [[ ! -f "$SPARKLE_PRIVATE_KEY_FILE" ]]; then
-  echo "Sparkle key file not found: $SPARKLE_PRIVATE_KEY_FILE" >&2
-  exit 1
-fi
-key_lines=$(grep -v '^[[:space:]]*#' "$SPARKLE_PRIVATE_KEY_FILE" | sed '/^[[:space:]]*$/d')
-if [[ $(printf "%s\n" "$key_lines" | wc -l) -ne 1 ]]; then
-  echo "Sparkle key file must contain exactly one base64 line (no comments/blank lines)." >&2
-  exit 1
+  echo "SPARKLE_PRIVATE_KEY_FILE not set — skipping Sparkle signing (fork build)."
+  SKIP_SPARKLE=true
+elif [[ ! -f "$SPARKLE_PRIVATE_KEY_FILE" ]]; then
+  echo "Sparkle key file not found: $SPARKLE_PRIVATE_KEY_FILE — skipping Sparkle signing." >&2
+  SKIP_SPARKLE=true
+else
+  key_lines=$(grep -v '^[[:space:]]*#' "$SPARKLE_PRIVATE_KEY_FILE" | sed '/^[[:space:]]*$/d')
+  if [[ $(printf "%s\n" "$key_lines" | wc -l) -ne 1 ]]; then
+    echo "Sparkle key file must contain exactly one base64 line (no comments/blank lines)." >&2
+    exit 1
+  fi
 fi
 
-echo "$APP_STORE_CONNECT_API_KEY_P8" | sed 's/\\n/\n/g' > /tmp/repobar-api-key.p8
-trap 'rm -f /tmp/repobar-api-key.p8 /tmp/RepoBarNotarize.zip' EXIT
+cleanup() {
+  if [[ "$CLEANUP_KEY_FILE" == "true" ]]; then
+    rm -f /tmp/repobar-api-key.p8
+  fi
+  rm -f "/tmp/${APP_NAME}Notarize.zip"
+}
+trap cleanup EXIT
 
-swift build -c release --arch arm64 --arch x86_64
+# Build universal binary (arm64 + x86_64).
+ARCHES_VALUE=${ARCHES:-"arm64 x86_64"}
+ARCH_LIST=( ${ARCHES_VALUE} )
+for ARCH in "${ARCH_LIST[@]}"; do
+  swift build -c release --arch "$ARCH"
+done
 SKIP_BUILD=1 ./Scripts/package_app.sh release
 
-# SwiftPM output locations vary (Xcode toolchain + SwiftPM version).
-# Resolve the produced app bundle explicitly instead of assuming `./RepoBar.app`.
-APP_BUNDLE=""
+# Resolve the built app bundle and copy to project root for signing/packaging.
+BUILT_BUNDLE=""
 for candidate in \
   ".build/apple/Products/Release/${APP_NAME}.app" \
   ".build/release/${APP_NAME}.app" \
   ".build/arm64-apple-macosx/release/${APP_NAME}.app" \
   ".build/x86_64-apple-macosx/release/${APP_NAME}.app"; do
   if [[ -d "$candidate" ]]; then
-    APP_BUNDLE="$candidate"
+    BUILT_BUNDLE="$candidate"
     break
   fi
 done
-if [[ -z "$APP_BUNDLE" ]]; then
-  echo "ERROR: app bundle not found (looked in common SwiftPM release locations)" >&2
+if [[ -z "$BUILT_BUNDLE" ]]; then
+  echo "ERROR: app bundle not found after package_app.sh" >&2
   exit 1
 fi
+rm -rf "$APP_BUNDLE"
+cp -R "$BUILT_BUNDLE" "$APP_BUNDLE"
 
 echo "Signing with $APP_IDENTITY"
-if [[ -z "${REPOBAR_SKIP_KEYCHAIN_GROUPS:-}" ]]; then
-  if [[ -z "${PROVISIONING_PROFILE_SPECIFIER:-}" ]]; then
-    export REPOBAR_SKIP_KEYCHAIN_GROUPS=1
-  else
-    export REPOBAR_SKIP_KEYCHAIN_GROUPS=0
-  fi
-fi
-./Scripts/codesign_app.sh "$APP_BUNDLE" "$APP_IDENTITY"
+# codesign_app.sh handles frameworks, aux binaries, and the main executable.
+CODESIGN_IDENTITY="$APP_IDENTITY" ./Scripts/codesign_app.sh "$APP_BUNDLE" "$APP_IDENTITY"
 
 DITTO_BIN=${DITTO_BIN:-/usr/bin/ditto}
-"$DITTO_BIN" -c -k --keepParent --sequesterRsrc "$APP_BUNDLE" /tmp/RepoBarNotarize.zip
+"$DITTO_BIN" --norsrc -c -k --keepParent "$APP_BUNDLE" "/tmp/${APP_NAME}Notarize.zip"
 
 echo "Submitting for notarization"
-xcrun notarytool submit /tmp/RepoBarNotarize.zip \
-  --key /tmp/repobar-api-key.p8 \
-  --key-id "$APP_STORE_CONNECT_KEY_ID" \
-  --issuer "$APP_STORE_CONNECT_ISSUER_ID" \
+xcrun notarytool submit "/tmp/${APP_NAME}Notarize.zip" \
+  --key "$NOTARY_KEY_PATH" \
+  --key-id "$NOTARY_KEY_ID" \
+  --issuer "$NOTARY_ISSUER" \
   --wait
 
 echo "Stapling ticket"
 xcrun stapler staple "$APP_BUNDLE"
 
-"$DITTO_BIN" -c -k --keepParent --sequesterRsrc "$APP_BUNDLE" "$ZIP_NAME"
+# Strip extended attributes that would create AppleDouble files when zipping
+xattr -cr "$APP_BUNDLE"
+find "$APP_BUNDLE" -name '._*' -delete
+
+"$DITTO_BIN" --norsrc -c -k --keepParent "$APP_BUNDLE" "$ZIP_NAME"
 
 spctl -a -t exec -vv "$APP_BUNDLE"
 stapler validate "$APP_BUNDLE"
 
 echo "Packaging dSYM"
-DSYM_PATH=".build/apple/Products/Release/RepoBar.dSYM"
-if [[ ! -d "$DSYM_PATH" ]]; then
-  DSYM_PATH=".build/release/RepoBar.dSYM"
-fi
-if [[ ! -d "$DSYM_PATH" ]]; then
-  DSYM_PATH=".build/arm64-apple-macosx/release/RepoBar.dSYM"
-fi
-if [[ ! -d "$DSYM_PATH" ]]; then
-  DSYM_PATH=".build/x86_64-apple-macosx/release/RepoBar.dSYM"
-fi
+FIRST_ARCH="${ARCH_LIST[0]}"
+PREFERRED_ARCH_DIR=".build/${FIRST_ARCH}-apple-macosx/release"
+DSYM_PATH="${PREFERRED_ARCH_DIR}/${APP_NAME}.dSYM"
 if [[ ! -d "$DSYM_PATH" ]]; then
   echo "Missing dSYM at $DSYM_PATH" >&2
   exit 1
 fi
-"$DITTO_BIN" -c -k --keepParent "$DSYM_PATH" "$DSYM_ZIP"
+if [[ ${#ARCH_LIST[@]} -gt 1 ]]; then
+  MERGED_DSYM="${PREFERRED_ARCH_DIR}/${APP_NAME}.dSYM-universal"
+  rm -rf "$MERGED_DSYM"
+  cp -R "$DSYM_PATH" "$MERGED_DSYM"
+  DWARF_PATH="${MERGED_DSYM}/Contents/Resources/DWARF/${APP_NAME}"
+  BINARIES=()
+  for ARCH in "${ARCH_LIST[@]}"; do
+    ARCH_DSYM=".build/${ARCH}-apple-macosx/release/${APP_NAME}.dSYM/Contents/Resources/DWARF/${APP_NAME}"
+    if [[ ! -f "$ARCH_DSYM" ]]; then
+      echo "Missing dSYM for ${ARCH} at $ARCH_DSYM" >&2
+      exit 1
+    fi
+    BINARIES+=("$ARCH_DSYM")
+  done
+  lipo -create "${BINARIES[@]}" -output "$DWARF_PATH"
+  DSYM_PATH="$MERGED_DSYM"
+fi
+"$DITTO_BIN" --norsrc -c -k --keepParent "$DSYM_PATH" "$DSYM_ZIP"
 
 echo "Done: $ZIP_NAME"
