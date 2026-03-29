@@ -42,7 +42,7 @@ extract_team_id() {
 
 # Prepare entitlements (enable hardened runtime, Sparkle XPC exceptions)
 if [ -f "$ENTITLEMENTS" ]; then
-  bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP_PATH/Contents/Info.plist" 2>/dev/null || echo 'com.steipete.repobar')"
+  bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP_PATH/Contents/Info.plist" 2>/dev/null || echo 'com.johnlarkin.repobar')"
   team_id="${DEVELOPMENT_TEAM:-}"
   if [ -z "$team_id" ]; then
     team_id="$(extract_team_id "$IDENTITY" || true)"
@@ -70,8 +70,8 @@ else
     <true/>
     <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
     <array>
-        <string>com.steipete.repobar-spks</string>
-        <string>com.steipete.repobar-spkd</string>
+        <string>com.johnlarkin.repobar-spks</string>
+        <string>com.johnlarkin.repobar-spkd</string>
     </array>
 </dict>
 </plist>

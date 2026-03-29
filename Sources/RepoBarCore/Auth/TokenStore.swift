@@ -36,7 +36,7 @@ public struct TokenStore: Sendable {
     private let logger = RepoBarLogging.logger("token-store")
 
     public init(
-        service: String = "com.steipete.repobar.auth",
+        service: String = "com.johnlarkin.repobar.auth",
         accessGroup: String? = nil
     ) {
         self.service = service
@@ -87,7 +87,7 @@ public struct TokenStore: Sendable {
 }
 
 extension TokenStore {
-    static let sharedAccessGroupSuffix = "com.steipete.repobar.shared"
+    static let sharedAccessGroupSuffix = "com.johnlarkin.repobar.shared"
 
     static func defaultAccessGroup() -> String? {
         #if os(macOS)

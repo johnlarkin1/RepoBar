@@ -5,7 +5,7 @@ import Testing
 struct TokenStorePATTests {
     @Test
     func savePATAndLoad() throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -18,7 +18,7 @@ struct TokenStorePATTests {
 
     @Test
     func clearRemovesPAT() throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -33,7 +33,7 @@ struct TokenStorePATTests {
 
     @Test
     func loadPATWhenNoneStored() throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -43,7 +43,7 @@ struct TokenStorePATTests {
 
     @Test
     func clearAlsoClearsPAT() throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -59,7 +59,7 @@ struct TokenStorePATTests {
 
     @Test
     func savePATOverwritesPrevious() throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 

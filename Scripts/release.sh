@@ -10,7 +10,7 @@ source "$HOME/Projects/agent-scripts/release/sparkle_lib.sh"
 APPCAST="$ROOT/appcast.xml"
 APP_NAME="RepoBar"
 ARTIFACT_PREFIX="RepoBar-"
-BUNDLE_ID="com.steipete.repobar"
+BUNDLE_ID="com.johnlarkin.repobar"
 TAG="v${MARKETING_VERSION}"
 
 err() { echo "ERROR: $*" >&2; exit 1; }

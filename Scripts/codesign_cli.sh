@@ -66,7 +66,7 @@ if [[ "$IDENTITY" == *"Developer ID Application"* ]]; then
   timestamp_arg="--timestamp"
 fi
 
-IDENTIFIER="com.steipete.repobar.cli"
+IDENTIFIER="com.johnlarkin.repobar.cli"
 
 log "Signing repobar ($CLI_PATH) with $IDENTITY"
 xattr -cr "$CLI_PATH" 2>/dev/null || true

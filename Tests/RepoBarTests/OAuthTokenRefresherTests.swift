@@ -5,7 +5,7 @@ import Testing
 struct OAuthTokenRefresherTests {
     @Test
     func refreshUsesStoredClientCredentials() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -43,7 +43,7 @@ struct OAuthTokenRefresherTests {
 
     @Test
     func refreshFailureShowsHelpfulMessage() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -82,7 +82,7 @@ struct OAuthTokenRefresherTests {
 
     @Test
     func refreshFailureHandlesMalformedSuccessResponse() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -121,7 +121,7 @@ struct OAuthTokenRefresherTests {
 
     @Test
     func refreshSkipsWhenRefreshTokenMissing() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 

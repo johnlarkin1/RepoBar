@@ -7,7 +7,7 @@ struct PATAuthenticatorTests {
     @Test
     @MainActor
     func validatePATSuccess() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -43,7 +43,7 @@ struct PATAuthenticatorTests {
     @Test
     @MainActor
     func validatePATInvalidToken() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -79,7 +79,7 @@ struct PATAuthenticatorTests {
     @Test
     @MainActor
     func validatePATForbidden() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -115,7 +115,7 @@ struct PATAuthenticatorTests {
     @Test
     @MainActor
     func logoutClearsPAT() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -136,7 +136,7 @@ struct PATAuthenticatorTests {
     @Test
     @MainActor
     func loadPATReturnsNilWhenNotStored() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 
@@ -149,7 +149,7 @@ struct PATAuthenticatorTests {
     @Test
     @MainActor
     func enterpriseHostUsesAPIPath() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 

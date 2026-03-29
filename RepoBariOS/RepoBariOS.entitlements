@@ -9,7 +9,7 @@
     </array>
     <key>keychain-access-groups</key>
     <array>
-        <string>$(AppIdentifierPrefix)com.steipete.repobar.shared</string>
+        <string>$(AppIdentifierPrefix)com.johnlarkin.repobar.shared</string>
     </array>
 </dict>
 </plist>

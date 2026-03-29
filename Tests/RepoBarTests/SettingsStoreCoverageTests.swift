@@ -44,13 +44,13 @@ struct SettingsStoreCoverageTests {
         var original = UserSettings()
         original.repoList.showForks = true
         let data = try JSONEncoder().encode(TestEnvelope(version: 1, settings: original))
-        defaults.set(data, forKey: "com.steipete.repobar.settings")
+        defaults.set(data, forKey: "com.johnlarkin.repobar.settings")
 
         let store = SettingsStore(defaults: defaults)
         let loaded = store.load()
         #expect(loaded.repoList.showForks == true)
 
-        let stored = defaults.data(forKey: "com.steipete.repobar.settings")
+        let stored = defaults.data(forKey: "com.johnlarkin.repobar.settings")
         let decoded = try JSONDecoder().decode(TestEnvelope.self, from: #require(stored))
         #expect(decoded.version == 3)
     }
@@ -60,7 +60,7 @@ struct SettingsStoreCoverageTests {
         let suiteName = "SettingsStoreCoverageTests.invalid.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
         defaults.removePersistentDomain(forName: suiteName)
-        defaults.set(Data([0x00, 0x01, 0x02]), forKey: "com.steipete.repobar.settings")
+        defaults.set(Data([0x00, 0x01, 0x02]), forKey: "com.johnlarkin.repobar.settings")
         let store = SettingsStore(defaults: defaults)
         #expect(store.load() == UserSettings())
     }
