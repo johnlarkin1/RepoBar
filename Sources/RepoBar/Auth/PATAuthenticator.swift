@@ -27,7 +27,7 @@ public enum PATAuthError: Error, LocalizedError {
 @MainActor
 public final class PATAuthenticator {
     private let tokenStore: TokenStore
-    private let signposter = OSSignposter(subsystem: "com.steipete.repobar", category: "pat-auth")
+    private let signposter = OSSignposter(subsystem: "com.johnlarkin.repobar", category: "pat-auth")
     private var cachedPAT: String?
     private var hasLoadedPAT = false
     private let session: URLSession

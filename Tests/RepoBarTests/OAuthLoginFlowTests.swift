@@ -6,7 +6,7 @@ struct OAuthLoginFlowTests {
     @Test
     @MainActor
     func loginPersistsTokensAndClientCredentials() async throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
         let store = TokenStore(service: service)
         defer { store.clear() }
 

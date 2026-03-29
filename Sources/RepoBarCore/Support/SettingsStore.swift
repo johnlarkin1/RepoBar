@@ -3,7 +3,7 @@ import Foundation
 /// Persists simple user settings in UserDefaults.
 public struct SettingsStore {
     private let defaults: UserDefaults
-    static let storageKey = "com.steipete.repobar.settings"
+    static let storageKey = "com.johnlarkin.repobar.settings"
     private let key = Self.storageKey
     private static let currentVersion = 3
 

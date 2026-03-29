@@ -36,7 +36,7 @@ final class StatusBarMenuManager: NSObject, NSMenuDelegate {
         menuBuilder: self.menuBuilder,
         actionHandler: self
     )
-    private let signposter = OSSignposter(subsystem: "com.steipete.repobar", category: "menu")
+    private let signposter = OSSignposter(subsystem: "com.johnlarkin.repobar", category: "menu")
     private let logger = RepoBarLogging.logger("menu-state")
     private weak var menuResizeWindow: NSWindow?
     private var lastMainMenuWidth: CGFloat?

@@ -5,7 +5,7 @@
     <key>CFBundleExecutable</key>
     <string>RepoBar</string>
     <key>CFBundleIdentifier</key>
-    <string>com.steipete.repobar</string>
+    <string>com.johnlarkin.repobar</string>
     <key>CFBundleName</key>
     <string>RepoBar</string>
     <key>CFBundlePackageType</key>

@@ -108,7 +108,7 @@ cat > "${INFO_PLIST}" <<PLIST
 <dict>
     <key>CFBundleName</key><string>${APP_NAME}</string>
     <key>CFBundleDisplayName</key><string>${APP_NAME}</string>
-    <key>CFBundleIdentifier</key><string>com.steipete.repobar</string>
+    <key>CFBundleIdentifier</key><string>com.johnlarkin.repobar</string>
     <key>CFBundleExecutable</key><string>${APP_NAME}</string>
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleShortVersionString</key><string>${MARKETING_VERSION}</string>
@@ -117,6 +117,7 @@ cat > "${INFO_PLIST}" <<PLIST
     <key>SUPublicEDKey</key><string>AGCY8w5vHirVfGGDGc8Szc5iuOqupZSh9pMj/Qs67XI=</string>
     <key>SUEnableAutomaticChecks</key><true/>
     <key>SUEnableInstallerLauncherService</key><true/>
+    <key>LSMinimumSystemVersion</key><string>15.0</string>
     <key>LSUIElement</key><true/>
     <key>LSMultipleInstancesProhibited</key><true/>
     <key>NSHighResolutionCapable</key><true/>
@@ -125,7 +126,7 @@ cat > "${INFO_PLIST}" <<PLIST
     <array>
         <dict>
             <key>CFBundleURLName</key>
-            <string>com.steipete.repobar</string>
+            <string>com.johnlarkin.repobar</string>
             <key>CFBundleURLSchemes</key>
             <array>
                 <string>repobar</string>

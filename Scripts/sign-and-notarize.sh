@@ -60,22 +60,41 @@ ARCH_LIST=( ${ARCHES_VALUE} )
 for ARCH in "${ARCH_LIST[@]}"; do
   swift build -c release --arch "$ARCH"
 done
-SKIP_BUILD=1 ./Scripts/package_app.sh release
+# Create universal binary by lipo-ing the per-arch builds into .build/release/
+FIRST_ARCH="${ARCH_LIST[0]}"
+RELEASE_DIR=".build/release"
+mkdir -p "$RELEASE_DIR"
 
-# Resolve the built app bundle and copy to project root for signing/packaging.
-BUILT_BUNDLE=""
-for candidate in \
-  ".build/apple/Products/Release/${APP_NAME}.app" \
-  ".build/release/${APP_NAME}.app" \
-  ".build/arm64-apple-macosx/release/${APP_NAME}.app" \
-  ".build/x86_64-apple-macosx/release/${APP_NAME}.app"; do
-  if [[ -d "$candidate" ]]; then
-    BUILT_BUNDLE="$candidate"
-    break
+echo "Creating universal binary"
+for product in "$APP_NAME" repobarcli; do
+  BINARIES=()
+  for ARCH in "${ARCH_LIST[@]}"; do
+    ARCH_BIN=".build/${ARCH}-apple-macosx/release/${product}"
+    if [[ -f "$ARCH_BIN" ]]; then
+      BINARIES+=("$ARCH_BIN")
+    fi
+  done
+  if [[ ${#BINARIES[@]} -gt 1 ]]; then
+    lipo -create "${BINARIES[@]}" -output "${RELEASE_DIR}/${product}"
+  elif [[ ${#BINARIES[@]} -eq 1 ]]; then
+    cp "${BINARIES[0]}" "${RELEASE_DIR}/${product}"
   fi
 done
-if [[ -z "$BUILT_BUNDLE" ]]; then
-  echo "ERROR: app bundle not found after package_app.sh" >&2
+
+# Copy any frameworks/resources from first arch build dir to release dir
+FIRST_BUILD=".build/${FIRST_ARCH}-apple-macosx/release"
+for item in Sparkle.framework; do
+  if [[ -d "${FIRST_BUILD}/${item}" && ! -d "${RELEASE_DIR}/${item}" ]]; then
+    cp -R "${FIRST_BUILD}/${item}" "${RELEASE_DIR}/${item}"
+  fi
+done
+
+SKIP_BUILD=1 ./Scripts/package_app.sh release
+
+# Copy the packaged bundle to project root for signing.
+BUILT_BUNDLE="${RELEASE_DIR}/${APP_NAME}.app"
+if [[ ! -d "$BUILT_BUNDLE" ]]; then
+  echo "ERROR: app bundle not found at ${BUILT_BUNDLE}" >&2
   exit 1
 fi
 rm -rf "$APP_BUNDLE"

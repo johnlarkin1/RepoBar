@@ -58,7 +58,7 @@ private final class LogState: @unchecked Sendable {
     private var fileLoggingEnabled = false
     private var fileHandle: FileHandle?
     private(set) var logFileURL: URL?
-    private let subsystem = "com.steipete.repobar"
+    private let subsystem = "com.johnlarkin.repobar"
     private let dateFormatter = ISO8601DateFormatter()
 
     func bootstrapIfNeeded() {

@@ -5,8 +5,8 @@ import Testing
 struct TokenStoreTests {
     @Test
     func saveLoadFallsBackWithoutAccessGroupEntitlement() throws {
-        let service = "com.steipete.repobar.auth.tests.\(UUID().uuidString)"
-        let store = TokenStore(service: service, accessGroup: "com.steipete.repobar.shared")
+        let service = "com.johnlarkin.repobar.auth.tests.\(UUID().uuidString)"
+        let store = TokenStore(service: service, accessGroup: "com.johnlarkin.repobar.shared")
         defer { store.clear() }
 
         let tokens = OAuthTokens(
